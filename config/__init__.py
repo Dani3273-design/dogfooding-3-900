@@ -1,0 +1,24 @@
+# -*- coding: utf-8 -*-
+from .config import (
+    WEATHER_API_URL,
+    INIT_HISTORY_DAYS,
+    SEQUENCE_DAYS,
+    TRAIN_EPOCHS,
+    TRAIN_BATCH_SIZE,
+    MODEL_NAME,
+    DATA_FILENAME,
+    CONFIG_FILENAME,
+    CITY_NAME
+)
+
+__all__ = [
+    'WEATHER_API_URL',
+    'INIT_HISTORY_DAYS',
+    'SEQUENCE_DAYS',
+    'TRAIN_EPOCHS',
+    'TRAIN_BATCH_SIZE',
+    'MODEL_NAME',
+    'DATA_FILENAME',
+    'CONFIG_FILENAME',
+    'CITY_NAME'
+]
