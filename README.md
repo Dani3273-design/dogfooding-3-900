@@ -306,3 +306,70 @@ Visibility: 12.0 km
 **问：怎么改成预测其他城市？**
 
 > 修改 `config/config.py` 中的 `CITY_NAME` 即可，例如 'Beijing'、'Shanghai'。
+
+---
+
+## 自动编译部署 (CI/CD)
+
+本项目配置了 GitHub Actions 自动编译部署流程，支持测试环境和生产环境。
+
+### 环境说明
+
+| 环境 | 触发分支 | 目标服务器 | 配置文件 |
+|------|----------|------------|----------|
+| Test (测试) | `test` | test.stoprefactoring.com | `.github/workflows/test.yml` |
+| Prov (生产) | `prov` | prov.stoprefactoring.com | `.github/workflows/prov.yaml` |
+
+### 编译流程
+
+1. **触发条件**：当 `test` 或 `prov` 分支有新代码提交时自动触发
+2. **编译环境**：Python 3.9 + PyInstaller
+3. **编译输出**：Linux 可执行文件 `weather`
+4. **打包内容**：
+   - 主程序 `main.py`
+   - `memory/` 目录（数据配置文件）
+   - `model/` 目录（模型文件）
+5. **部署路径**：目标服务器 `/public/engine/weather`
+6. **通知机制**：编译成功/失败均发送邮件至 yiigaa@126.com
+
+### 使用方法
+
+```bash
+# 部署到测试环境
+git checkout test
+git add .
+git commit -m "your commit message"
+git push origin test
+
+# 部署到生产环境
+git checkout prov
+git add .
+git commit -m "your commit message"
+git push origin prov
+```
+
+### 前置配置
+
+在 GitHub 仓库的 Settings → Secrets and variables → Actions 中配置以下密钥：
+
+| Secret 名称 | 说明 |
+|-------------|------|
+| `SSH_USERNAME` | SSH 登录用户名 |
+| `SSH_PRIVATE_KEY` | SSH 私钥内容 |
+| `EMAIL_USERNAME` | 发件邮箱账号 |
+| `EMAIL_PASSWORD` | 邮箱授权码 |
+
+### 编译产物
+
+编译后的可执行文件 `weather` 可直接在 Linux 服务器上运行：
+
+```bash
+# 查看帮助
+./weather
+
+# 更新数据并训练
+./weather auto
+
+# 预测明天天气
+./weather tomorrow
+```
