@@ -306,3 +306,47 @@ Visibility: 12.0 km
 **问：怎么改成预测其他城市？**
 
 > 修改 `config/config.py` 中的 `CITY_NAME` 即可，例如 'Beijing'、'Shanghai'。
+
+---
+
+## 自动编译说明
+
+本项目使用 GitHub Actions 实现 CI/CD 自动编译和部署。
+
+### 触发条件
+
+| 环境 | 分支 | 触发条件 |
+|------|------|----------|
+| 测试环境 | `test` | 代码推送到 test 分支时自动触发 |
+| 生产环境 | `prov` | 代码推送到 prov 分支时自动触发 |
+
+### 编译流程
+
+1. **环境准备**: 使用 Ubuntu 20.04 + Python 3.9
+2. **依赖安装**: 安装 PyInstaller 和 requirements.txt 中的依赖
+3. **编译打包**: 使用 PyInstaller 将项目编译为 Linux 可执行文件 `weather`
+4. **资源打包**: 自动打包 `memory/` 和 `model/` 目录下的文件
+5. **部署发布**: 通过 SSH 将编译结果上传到目标服务器
+
+### 部署目标
+
+| 环境 | 服务器 | 部署路径 |
+|------|--------|----------|
+| 测试环境 | test.stoprefactoring.com:22 | /public/engine/weather |
+| 生产环境 | prov.stoprefactoring.com:22 | /public/engine/weather |
+
+### 通知机制
+
+- 编译成功或失败都会发送邮件通知到: yiigaa@126.com
+- 邮件包含构建状态、提交信息和部署详情
+
+### GitHub Secrets 配置
+
+需要在 GitHub 仓库设置以下 Secrets:
+
+| Secret 名称 | 说明 |
+|-------------|------|
+| `TEST_SSH_KEY` | 测试环境服务器 SSH 私钥 |
+| `PROV_SSH_KEY` | 生产环境服务器 SSH 私钥 |
+| `EMAIL_USERNAME` | 发件邮箱账号 |
+| `EMAIL_PASSWORD` | 发件邮箱密码/授权码 |
