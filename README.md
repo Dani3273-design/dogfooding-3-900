@@ -306,3 +306,60 @@ Visibility: 12.0 km
 **问：怎么改成预测其他城市？**
 
 > 修改 `config/config.py` 中的 `CITY_NAME` 即可，例如 'Beijing'、'Shanghai'。
+
+---
+
+## CI/CD 自动编译部署说明
+
+本项目已配置 GitHub Actions 自动编译部署流程，支持测试环境和生产环境的自动化发布。
+
+### 环境说明
+
+| 环境 | 触发分支 | 目标服务器 | 部署路径 |
+|------|----------|------------|----------|
+| 测试环境 (Test) | `test` 分支 | `test.stoprefactoring.com:22` | `/public/engine/weather` |
+| 生产环境 (Production) | `prov` 分支 | `prov.stoprefactoring.com:22` | `/public/engine/weather` |
+
+### 编译参数
+
+- **Python版本**: 3.9
+- **编译工具**: PyInstaller
+- **编译目标平台**: Linux
+- **输出文件名**: `weather`（单文件可执行程序）
+- **打包内容**:
+  - 主程序代码
+  - `memory/` 目录下所有文件（数据和配置）
+  - `model/` 目录下所有文件（训练好的模型）
+  - `config` Python模块通过 `--hidden-import` 自动导入
+
+### 触发方式
+
+1. **测试环境部署**：
+   ```bash
+   git checkout test
+   git add .
+   git commit -m "deploy: test environment update"
+   git push origin test
+   ```
+   推送到 `test` 分支后自动触发编译和部署。
+
+2. **生产环境部署**：
+   ```bash
+   git checkout prov
+   git add .
+   git commit -m "deploy: production environment update"
+   git push origin prov
+   ```
+   推送到 `prov` 分支后自动触发编译和部署。
+
+### 通知机制
+
+- 无论部署成功或失败，都会自动发送邮件通知到 `yiigaa@126.com`
+- 邮件包含：项目名称、环境、分支、Commit ID、提交者、执行时间
+
+### 前置配置（GitHub Secrets）
+
+需要在GitHub项目中配置以下Secrets：
+- `SSH_PRIVATE_KEY`: 服务器SSH私钥
+- `EMAIL_USERNAME`: 发送通知邮件的邮箱账号
+- `EMAIL_PASSWORD`: 发送通知邮件的邮箱密码或应用专用密码
